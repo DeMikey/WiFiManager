@@ -14,6 +14,8 @@
 #ifndef WiFiManager_h
 #define WiFiManager_h
 
+
+/*
 #if defined(ESP8266) || defined(ESP32)
 
 #ifdef ESP8266
@@ -131,7 +133,244 @@
 
 #include <DNSServer.h>
 #include <memory>
+*/
 
+////////////////////////////////////////////////////
+#define WM_WEBSERVERSHIM      // use webserver shim lib
+
+#define WM_G(string_literal)  (String(FPSTR(string_literal)).c_str())
+
+
+#if !( defined(ESP8266) ||  defined(ESP32) )
+  #error This code is intended to run on the ESP8266 or ESP32 platform! Please check your Tools->Board setting.
+#elif ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_ESP32S2_THING_PLUS || ARDUINO_MICROS2 || \
+        ARDUINO_METRO_ESP32S2 || ARDUINO_MAGTAG29_ESP32S2 || ARDUINO_FUNHOUSE_ESP32S2 || \
+        ARDUINO_ADAFRUIT_FEATHER_ESP32S2_NOPSRAM )
+  #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3)
+    #warning Using ESP32_S2. To follow library instructions to install esp32-s2 core and WebServer Patch
+    #warning You have to select HUGE APP or 1.9-2.0 MB APP to be able to run Config Portal. Must use PSRAM
+  #endif
+  
+  #define USING_ESP32_S2        true
+  
+#elif ( ARDUINO_ESP32C3_DEV )
+  #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3)
+    #if ( defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 2) )
+      #warning Using ESP32_C3 using core v2.0.0+. Either LittleFS, SPIFFS or EEPROM OK
+    #else
+      #warning Using ESP32_C3 using core v1.0.6-. To follow library instructions to install esp32-c3 core. Only SPIFFS and EEPROM OK
+    #endif
+    
+    #warning You have to select Flash size 2MB and Minimal APP (1.3MB + 700KB) for some boards
+  
+  #endif
+  
+  #define USING_ESP32_C3        true
+  
+#elif ( defined(ARDUINO_ESP32S3_DEV) || defined(ARDUINO_ESP32_S3_BOX) || defined(ARDUINO_TINYS3) || \
+        defined(ARDUINO_PROS3) || defined(ARDUINO_FEATHERS3) )
+
+  #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3)    
+    #warning Using ESP32_S3. To install esp32-s3-support branch if using core v2.0.2-
+  #endif
+  
+  #define USING_ESP32_S3        true   
+#endif
+
+////////////////////////////////////////////////////
+
+#define ESP_ASYNC_WIFIMANAGER_VERSION           "ESPAsync_WiFiManager v1.15.1"
+
+#define ESP_ASYNC_WIFIMANAGER_VERSION_MAJOR     1
+#define ESP_ASYNC_WIFIMANAGER_VERSION_MINOR     15
+#define ESP_ASYNC_WIFIMANAGER_VERSION_PATCH     1
+
+#define ESP_ASYNC_WIFIMANAGER_VERSION_INT       1015001
+
+////////////////////////////////////////////////////
+
+#if ESP8266
+  #if (ARDUINO_ESP8266_GIT_VER == 0xcf6ff4c4)
+    #define USING_ESP8266_CORE_VERSION    30002
+    #define ESP8266_CORE_VERSION          "ESP8266 core v3.0.2"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "3.0.2"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0xcbf44fb3)
+    #define USING_ESP8266_CORE_VERSION    30001
+    #define ESP8266_CORE_VERSION          "ESP8266 core v3.0.1"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "3.0.1"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0xefb0341a)
+    #define USING_ESP8266_CORE_VERSION    30000
+    #define ESP8266_CORE_VERSION          "ESP8266 core v3.0.0"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "3.0.0"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x2843a5ac)
+    #define USING_ESP8266_CORE_VERSION    20704
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.4"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.7.4"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x5d3af165)
+    #define USING_ESP8266_CORE_VERSION    20703
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.3"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.7.3"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x39c79d9b)
+    #define USING_ESP8266_CORE_VERSION    20702
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.2"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3)
+      #warning USING_ESP8266_CORE_VERSION "2.7.2"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0xa5432625)
+    #define USING_ESP8266_CORE_VERSION    20701
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.7.1"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.7.1"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x3d128e5c)
+    #define USING_ESP8266_CORE_VERSION    20603
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.3"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.6.3"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x482516e3)
+    #define USING_ESP8266_CORE_VERSION    20602
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.2"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.6.2"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x482516e3)
+    #define USING_ESP8266_CORE_VERSION    20601
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.1"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.6.1"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x643ec203)
+    #define USING_ESP8266_CORE_VERSION    20600
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.6.0"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.6.0"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x8b899c12)
+    #define USING_ESP8266_CORE_VERSION    20502
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.5.2"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.5.2"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x00000000)
+    #define USING_ESP8266_CORE_VERSION    20402
+    #define ESP8266_CORE_VERSION          "ESP8266 core v2.4.2"
+    
+    #if (_ESPASYNC_WIFIMGR_LOGLEVEL_ > 3) 
+      #warning USING_ESP8266_CORE_VERSION "2.4.2"
+    #endif
+    
+  #elif (ARDUINO_ESP8266_GIT_VER == 0x643ec203)
+    #define USING_ESP8266_CORE_VERSION    0
+    #define ESP8266_CORE_VERSION          "ESP8266 core too old"
+    #warning USING_ESP8266_CORE_VERSION "0.0.0"
+  #else
+    #define USING_ESP8266_CORE_VERSION    999999
+    #define ESP8266_CORE_VERSION          "ESP8266 core unknown"
+    #warning USING_ESP8266_CORE_VERSION "x.y.z"  
+  #endif
+#endif
+
+////////////////////////////////////////////////////
+
+#include "ESPAsync_WiFiManager_Debug.h"
+
+////////////////////////////////////////////////////
+
+//KH, for ESP32
+#ifdef ESP8266
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncWebServer.h>
+#else   //ESP32
+  #include <WiFi.h>
+  #include <ESPAsyncWebServer.h>
+  #include <ArduinoOTA.h>
+#endif
+
+#include <ESPAsyncDNSServer.h>
+
+#include <memory>
+#undef min
+#undef max
+
+#include <algorithm>
+
+////////////////////////////////////////////////////
+
+// fix crash on ESP32 (see https://github.com/alanswx/ESPAsyncWiFiManager/issues/44)
+#if defined(ESP8266)
+  typedef int     wifi_ssid_count_t;
+#else
+  typedef int16_t wifi_ssid_count_t;
+#endif
+
+////////////////////////////////////////////////////
+
+//KH, for ESP32
+#ifdef ESP8266
+  extern "C"
+  {
+    #include "user_interface.h"
+  }
+  
+  #define ESP_getChipId()   (ESP.getChipId())
+#else   //ESP32
+
+  #include <esp_wifi.h>
+  
+  uint32_t getChipID();
+  uint32_t getChipOUI();
+   
+  #if defined(ESP_getChipId)
+    #undef ESP_getChipId
+  #endif
+  
+  #define ESP_getChipId()   getChipID()
+  #define WIFI_getChipId() (uint32_t)ESP.getEfuseMac()
+  #define ESP_getChipOUI()  getChipOUI()
+  #define WM_WIFIOPEN   WIFI_AUTH_OPEN
+
+#endif
+
+////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Include wm strings vars
 // Pass in strings env override via WM_STRINGS_FILE
@@ -488,12 +727,13 @@ class WiFiManager
     String        getWiFiHostname();
 
 
-    std::unique_ptr<DNSServer>        dnsServer;
+//    std::unique_ptr<DNSServer>        dnsServer;
+    std::unique_ptr<AsyncDNSServer>        dnsServer;
 
     #if defined(ESP32) && defined(WM_WEBSERVERSHIM)
-        using WM_WebServer = WebServer;
+        using WM_WebServer = AsyncWebServer;
     #else
-        using WM_WebServer = ESP8266WebServer;
+        using WM_WebServer = AsyncWebServer;
     #endif
     
     std::unique_ptr<WM_WebServer> server;
@@ -646,31 +886,30 @@ class WiFiManager
     void          updateConxResult(uint8_t status);
 
     // webserver handlers
-    void          HTTPSend(const String &content);
-    void          handleRoot();
-    void          handleWifi(boolean scan);
-    void          handleWifiSave();
-    void          handleInfo();
-    void          handleReset();
-    void          handleNotFound();
-    void          handleExit();
-    void          handleClose();
+    void          HTTPSend(AsyncWebServerRequest *request, const String &content);
+    void          handleRoot(AsyncWebServerRequest *request);
+    void          handleWifi(AsyncWebServerRequest *request, boolean scan);
+    void          handleWifiSave(AsyncWebServerRequest *request);
+    void          handleInfo(AsyncWebServerRequest *request);
+    void          handleReset(AsyncWebServerRequest *request);
+    void          handleNotFound(AsyncWebServerRequest *request);
+    void          handleExit(AsyncWebServerRequest *request);
+    void          handleClose(AsyncWebServerRequest *request);
     // void          handleErase();
-    void          handleErase(boolean opt);
-    void          handleParam();
-    void          handleWiFiStatus();
-    void          handleRequest();
-    void          handleParamSave();
-    void          doParamSave();
+    void          handleErase(AsyncWebServerRequest *request, boolean opt);
+    void          handleParam(AsyncWebServerRequest *request);
+    void          handleWiFiStatus(AsyncWebServerRequest *request);
+    void          handleRequest(AsyncWebServerRequest *request);
+    void          handleParamSave(AsyncWebServerRequest *request);
+    void          doParamSave(AsyncWebServerRequest *request);
 
-    boolean       captivePortal();
+    boolean       captivePortal(AsyncWebServerRequest *request);
     boolean       configPortalHasTimeout();
     uint8_t       processConfigPortal();
     void          stopCaptivePortal();
 	// OTA Update handler
-	void          handleUpdate();
-	void          handleUpdating();
-	void          handleUpdateDone();
+	void          handleUpdate(AsyncWebServerRequest *request);
+	void          handleUpdating(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final);
 
 
     // wifi platform abstractions
@@ -778,7 +1017,7 @@ class WiFiManager
     
     // Set default debug level
     #ifndef WM_DEBUG_LEVEL
-    #define WM_DEBUG_LEVEL DEBUG_NOTIFY
+    #define WM_DEBUG_LEVEL DEBUG_MAX
     #endif
 
     // override debug level OFF
@@ -834,4 +1073,4 @@ class WiFiManager
 
 #endif
 
-#endif
+// #endif

@@ -98,6 +98,12 @@ const char HTTP_HEAD_CT[]         PROGMEM = "text/html";
 const char HTTP_HEAD_CT2[]        PROGMEM = "text/plain";
 const char HTTP_HEAD_CORS[]       PROGMEM = "Access-Control-Allow-Origin";
 const char HTTP_HEAD_CORS_ALLOW_ALL[]  PROGMEM = "*";
+const char WM_HTTP_NO_STORE[]     PROGMEM = "no-cache, no-store, must-revalidate";
+const char WM_HTTP_PRAGMA[]       PROGMEM = "Pragma";
+const char WM_HTTP_NO_CACHE[]     PROGMEM = "no-cache";
+const char WM_HTTP_CACHE_CONTROL[] PROGMEM = "Cache-Control";
+const char WM_HTTP_EXPIRES[]      PROGMEM = "Expires";
+
 
 const char * const WIFI_STA_STATUS[] PROGMEM
 {
