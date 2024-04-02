@@ -306,8 +306,9 @@
 #endif
 
 ////////////////////////////////////////////////////
-
+#include "Arduino.h"
 #include "ESPAsync_WiFiManager_Debug.h"
+#include "StreamString.h"
 
 ////////////////////////////////////////////////////
 
@@ -554,6 +555,12 @@ class WiFiManager
     //called just before doing OTA update
     void          setPreOtaUpdateCallback( std::function<void()> func );
 
+    //called on progress doing OTA update
+    void          setProgressOtaUpdateCallback(std::function<void(size_t current, size_t final)> func);
+
+    //called after OTA update
+    void          setEndOtaUpdateCallback(std::function<void(bool success)> func);
+
     //called when config portal is timeout
     void          setConfigPortalTimeoutCallback( std::function<void()> func );
 
@@ -761,6 +768,10 @@ class WiFiManager
     unsigned long _lastscan               = 0; // ms for timing wifi scans
     unsigned long _startscan              = 0; // ms for timing wifi scans
     unsigned long _startconn              = 0; // ms for timing wifi connects
+    // OTA
+    String _update_error = "";
+    unsigned long _current_progress_size;
+
 
     // defaults
     const byte    DNS_PORT                = 53;
@@ -1057,7 +1068,9 @@ class WiFiManager
     std::function<void()> _presaveparamscallback;
     std::function<void()> _saveparamscallback;
     std::function<void()> _resetcallback;
-    std::function<void()> _preotaupdatecallback;
+    std::function<void()> _preotaupdatecallback = NULL;
+    std::function<void(size_t current, size_t final)> _progressOtaUpdateCallback = NULL;
+    std::function<void(bool success)> _postOtaUpdateCallback = NULL;
     std::function<void()> _configportaltimeoutcallback;
 
     template <class T>
