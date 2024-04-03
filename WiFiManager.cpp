@@ -707,12 +707,6 @@ void WiFiManager::setupDNSD() {
 void WiFiManager::setupConfigPortal() {
   setupHTTPServer();
   _lastscan = 0; // reset network scan cache
-  #ifdef WM_DEBUG_LEVEL
-    DEBUG_WM(DEBUG_VERBOSE,F("ParameterCount:"), (String) _paramsCount);
-    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter:"), (String) _params[0]->getID());
-    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter Length:"),(String) _params[0]->_length);
-  #endif
-
   if(_preloadwifiscan) WiFi_scanNetworks(true,true); // preload wifiscan , async
 }
 
@@ -1520,13 +1514,14 @@ String WiFiManager::getMenuOut(){
 // }
 
 void WiFiManager::WiFi_scanComplete(int networksFound){
-  #ifdef WM_DEBUG_LEVEL
+    #ifdef WM_DEBUG_LEVEL
     DEBUG_WM(DEBUG_VERBOSE,F("ParameterCount:"), (String) _paramsCount);
     DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter:"), (String) _params[0]->getID());
     DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter Length:"),(String) _params[0]->_length);
   #endif
   _lastscan = millis();
   _numNetworks = networksFound;
+
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC completed"), "in "+(String)(_lastscan - _startscan)+" ms");  
   DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC found:"),_numNetworks);
@@ -1578,8 +1573,8 @@ bool WiFiManager::WiFi_scanNetworks(bool force,bool async){
           res = WiFi.scanNetworks();
           #endif
         #else
-       #ifdef WM_DEBUG_LEVEL
-          DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC started"));
+          #ifdef WM_DEBUG_LEVEL
+            DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC started........."));
           #endif
           res = WiFi.scanNetworks(true);
         #endif
