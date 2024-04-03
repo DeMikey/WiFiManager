@@ -176,11 +176,13 @@ bool WiFiManager::addParameter(WiFiManagerParameter *p) {
   }
 
   _params[_paramsCount] = p;
+  #ifdef WM_DEBUG_LEVEL
+    DEBUG_WM(DEBUG_VERBOSE,F("ParameterCount:"), (String) _paramsCount);
+    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter:"), (String) _params[_paramsCount]->getID());
+    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter Length:"),(String) _params[_paramsCount]->_length);
+  #endif
   _paramsCount++;
   
-  #ifdef WM_DEBUG_LEVEL
-  DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter:"),p->getID());
-  #endif
   return true;
 }
 
@@ -388,7 +390,7 @@ boolean WiFiManager::autoConnect(char const *apName, char const *apPassword) {
   return res;
 }
 
-bool WiFiManager::setupHostname(bool restart){
+bool WiFiManager::setupHostname(bool restart) {
   if(_hostname == "") {
     #ifdef WM_DEBUG_LEVEL
     DEBUG_WM(DEBUG_DEV,F("No Hostname to set"));
@@ -400,6 +402,7 @@ bool WiFiManager::setupHostname(bool restart){
     DEBUG_WM(DEBUG_VERBOSE,F("Setting Hostnames: "),_hostname);
     #endif
   }
+
   bool res = true;
   #ifdef ESP8266
     #ifdef WM_DEBUG_LEVEL
@@ -460,7 +463,7 @@ bool WiFiManager::setupHostname(bool restart){
 }
 
 // CONFIG PORTAL
-bool WiFiManager::startAP(){
+bool WiFiManager::startAP() {
   bool ret = true;
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(F("StartAP with SSID: "),_apName);
@@ -574,7 +577,7 @@ void WiFiManager::stopWebPortal() {
   shutdownConfigPortal();
 }
 
-boolean WiFiManager::configPortalHasTimeout(){
+boolean WiFiManager::configPortalHasTimeout() {
     if(!configPortalActive) return false;
     uint16_t logintvl = 30000; // how often to emit timeing out counter logging
 
@@ -614,7 +617,7 @@ boolean WiFiManager::configPortalHasTimeout(){
     return false;
 }
 
-void WiFiManager::setupHTTPServer(){
+void WiFiManager::setupHTTPServer() {
 
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(F("Starting Web Portal"));
@@ -688,7 +691,7 @@ void WiFiManager::setupHTTPServer(){
   #endif
 }
 
-void WiFiManager::setupDNSD(){
+void WiFiManager::setupDNSD() {
 //  dnsServer.reset(new DNSServer());
   dnsServer.reset(new AsyncDNSServer());
 
@@ -851,7 +854,7 @@ boolean  WiFiManager::startConfigPortal(char const *apName, char const *apPasswo
  * @access public
  * @return bool connected
  */
-boolean WiFiManager::process(){
+boolean WiFiManager::process() {
     // process mdns, esp32 not required
     #if defined(WM_MDNS) && defined(ESP8266)
     MDNS.update();
@@ -887,7 +890,7 @@ boolean WiFiManager::process(){
  * 
  * @return {[type]} [description]
  */
-uint8_t WiFiManager::processConfigPortal(){
+uint8_t WiFiManager::processConfigPortal() {
     if(configPortalActive){
       //DNS handler
 //      dnsServer->processNextRequest();
@@ -979,7 +982,7 @@ uint8_t WiFiManager::processConfigPortal(){
  * @access public
  * @return bool success (softapdisconnect)
  */
-bool WiFiManager::shutdownConfigPortal(){
+bool WiFiManager::shutdownConfigPortal() {
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(DEBUG_VERBOSE,F("shutdownConfigPortal"));
   #endif
@@ -1298,7 +1301,7 @@ void WiFiManager::startWPS() {
 }
 #endif
 
-String WiFiManager::getHTTPHead(String title){
+String WiFiManager::getHTTPHead(String title) {
   String page;
   page += FPSTR(HTTP_HEAD_START);
   page.replace(FPSTR(T_v), title);
@@ -1411,6 +1414,7 @@ void WiFiManager::handleWifi(AsyncWebServerRequest *request, boolean scan) {
   #endif
   handleRequest(request);
   String page = getHTTPHead(FPSTR(S_titlewifi)); // @token titlewifi
+  page += FPSTR(HTTP_MENU_BACK);
   if (scan) {
     #ifdef WM_DEBUG_LEVEL
     // DEBUG_WM(DEBUG_DEV,"refresh flag:",server->hasArg(F("refresh")));
@@ -1461,13 +1465,13 @@ void WiFiManager::handleWifi(AsyncWebServerRequest *request, boolean scan) {
 /**
  * HTTPD CALLBACK Wifi param page handler
  */
-void WiFiManager::handleParam(AsyncWebServerRequest *request){
+void WiFiManager::handleParam(AsyncWebServerRequest *request) {
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(DEBUG_VERBOSE,F("<- HTTP Param"));
   #endif
   handleRequest(request);
   String page = getHTTPHead(FPSTR(S_titleparam)); // @token titlewifi
-
+  page += FPSTR(HTTP_MENU_BACK);
   String pitem = "";
 
   pitem = FPSTR(HTTP_FORM_START);
@@ -1490,16 +1494,17 @@ void WiFiManager::handleParam(AsyncWebServerRequest *request){
 
 String WiFiManager::getMenuOut(){
   String page;  
-
+  page += HTTP_PORTAL_MENU_START;
   for(auto menuId :_menuIds ){
-    if((String)_menutokens[menuId] == "param" && _paramsCount == 0) continue; // no params set, omit params from menu, @todo this may be undesired by someone, use only menu to force?
+//    if((String)_menutokens[menuId] == "param" && _paramsCount == 0) continue; // no params set, omit params from menu, @todo this may be undesired by someone, use only menu to force?
     if((String)_menutokens[menuId] == "custom" && _customMenuHTML!=NULL){
       page += _customMenuHTML;
       continue;
     }
     page += HTTP_PORTAL_MENU[menuId];
   }
-
+  page += HTTP_PORTAL_MENU_END;
+  
   return page;
 }
 
@@ -1509,8 +1514,14 @@ String WiFiManager::getMenuOut(){
 // }
 
 void WiFiManager::WiFi_scanComplete(int networksFound){
+    #ifdef WM_DEBUG_LEVEL
+    DEBUG_WM(DEBUG_VERBOSE,F("ParameterCount:"), (String) _paramsCount);
+    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter:"), (String) _params[0]->getID());
+    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter Length:"),(String) _params[0]->_length);
+  #endif
   _lastscan = millis();
   _numNetworks = networksFound;
+
   #ifdef WM_DEBUG_LEVEL
   DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC completed"), "in "+(String)(_lastscan - _startscan)+" ms");  
   DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC found:"),_numNetworks);
@@ -1562,8 +1573,8 @@ bool WiFiManager::WiFi_scanNetworks(bool force,bool async){
           res = WiFi.scanNetworks();
           #endif
         #else
-        #ifdef WM_DEBUG_LEVEL
-          DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC started"));
+          #ifdef WM_DEBUG_LEVEL
+            DEBUG_WM(DEBUG_VERBOSE,F("WiFi Scan ASYNC started........."));
           #endif
           res = WiFi.scanNetworks(true);
         #endif
@@ -1787,11 +1798,15 @@ String WiFiManager::getParamOut(){
     char valLength[5];
 
     for (int i = 0; i < _paramsCount; i++) {
-      //Serial.println((String)_params[i]->_length);
+      #ifdef WM_DEBUG_LEVEL
+        DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter Length:"),(String) _params[0]->_length);
+        DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter:"),_params[0]->getID());
+      #endif
+ 
       if (_params[i] == NULL || _params[i]->_length > 99999) {
         // try to detect param scope issues, doesnt always catch but works ok
         #ifdef WM_DEBUG_LEVEL
-        DEBUG_WM(DEBUG_ERROR,F("[ERROR] WiFiManagerParameter is out of scope"));
+          DEBUG_WM(DEBUG_ERROR,F("[ERROR] WiFiManagerParameter is out of scope"));
         #endif
         return "";
       }
@@ -1930,7 +1945,7 @@ void WiFiManager::handleWifiSave(AsyncWebServerRequest *request) {
     page = getHTTPHead(FPSTR(S_titlewifisaved)); // @token titlewifisaved
     page += FPSTR(HTTP_SAVED);
   }
-
+  page += FPSTR(HTTP_MENU_BACK);
   if(_showBack) page += FPSTR(HTTP_BACKBTN);
   page += FPSTR(HTTP_END);
 
@@ -1979,7 +1994,8 @@ void WiFiManager::handleParamSave(AsyncWebServerRequest *request) {
 
   String page = getHTTPHead(FPSTR(S_titleparamsaved)); // @token titleparamsaved
   page += FPSTR(HTTP_PARAMSAVED);
-  if(_showBack) page += FPSTR(HTTP_BACKBTN); 
+  if(_showBack) page += FPSTR(HTTP_BACKBTN);
+  page += FPSTR(HTTP_MENU_BACK);
   page += FPSTR(HTTP_END);
 
   HTTPSend(request, page);
@@ -2044,6 +2060,7 @@ void WiFiManager::handleInfo(AsyncWebServerRequest *request) {
   #endif
   handleRequest(request);
   String page = getHTTPHead(FPSTR(S_titleinfo)); // @token titleinfo
+  page += FPSTR(HTTP_MENU_BACK);
   reportStatus(page);
 
   uint16_t infos = 0;
@@ -2389,6 +2406,7 @@ void WiFiManager::handleExit(AsyncWebServerRequest *request) {
   #endif
   handleRequest(request);
   String page = getHTTPHead(FPSTR(S_titleexit)); // @token titleexit
+  page += FPSTR(HTTP_MENU_BACK);
   page += FPSTR(S_exiting); // @token exiting
   // ('Logout', 401, {'WWW-Authenticate': 'Basic realm="Login required"'})
 //  server->sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate")); // @HTTPHEAD send cache
@@ -2406,6 +2424,7 @@ void WiFiManager::handleReset(AsyncWebServerRequest *request) {
   #endif
   handleRequest(request);
   String page = getHTTPHead(FPSTR(S_titlereset)); //@token titlereset
+  page += FPSTR(HTTP_MENU_BACK);
   page += FPSTR(S_resetting); //@token resetting
   page += FPSTR(HTTP_END);
 
@@ -2431,7 +2450,7 @@ void WiFiManager::handleErase(AsyncWebServerRequest *request, boolean opt) {
   #endif
   handleRequest(request);
   String page = getHTTPHead(FPSTR(S_titleerase)); // @token titleerase
-
+  page += FPSTR(HTTP_MENU_BACK);
   bool ret = erase(opt);
 
   if(ret) page += FPSTR(S_resetting); // @token resetting
@@ -2541,7 +2560,7 @@ boolean WiFiManager::captivePortal(AsyncWebServerRequest *request) {
   return false;
 }
 
-void WiFiManager::stopCaptivePortal(){
+void WiFiManager::stopCaptivePortal() {
   _enableCaptivePortal= false;
   // @todo maybe disable configportaltimeout(optional), or just provide callback for user
 }
@@ -2555,6 +2574,7 @@ void WiFiManager::handleClose(AsyncWebServerRequest *request) {
   #endif
   handleRequest(request);
   String page = getHTTPHead(FPSTR(S_titleclose)); // @token titleclose
+  page += FPSTR(HTTP_MENU_BACK);
   page += FPSTR(S_closing); // @token closing
   HTTPSend(request, page);
 }
@@ -2949,6 +2969,24 @@ void WiFiManager::setPreOtaUpdateCallback( std::function<void()> func ) {
 }
 
 /**
+ * setProgressOtaUpdateCallback, set a callback to fire on process OTA update
+ * @access public
+ * @param {[type]} size_t, size_t (*func)(void)
+ */
+void WiFiManager::setProgressOtaUpdateCallback(std::function<void(size_t current, size_t final)> func){
+  _progressOtaUpdateCallback= func;
+}
+
+/**
+ * setEndOtaUpdateCallback, set a callback to fire before OTA update
+ * @access public
+ * @param {[type]} bool (*func)(void)
+ */
+void WiFiManager::setEndOtaUpdateCallback(std::function<void(bool success)> func){
+    _postOtaUpdateCallback = func;
+}
+
+/**
  * setConfigPortalTimeoutCallback, set a callback to config portal is timeout
  * @access public
  * @param {[type]} void (*func)(void)
@@ -3128,8 +3166,7 @@ void WiFiManager::setEnableConfigPortal(boolean enable)
  * @access public
  * @param boolean enabled [true]
  */
-void WiFiManager::setDisableConfigPortal(boolean enable)
-{
+void WiFiManager::setDisableConfigPortal(boolean enable) {
     _disableConfigPortal = enable;
 }
 
@@ -3140,13 +3177,13 @@ void WiFiManager::setDisableConfigPortal(boolean enable)
  * @param  char* hostname 32 character hostname to use for sta+ap in esp32, sta in esp8266
  * @return bool false if hostname is not valid
  */
-bool  WiFiManager::setHostname(const char * hostname){
+bool  WiFiManager::setHostname(const char * hostname) {
   //@todo max length 32
   _hostname = String(hostname);
   return true;
 }
 
-bool  WiFiManager::setHostname(String hostname){
+bool  WiFiManager::setHostname(String hostname) {
   //@todo max length 32
   _hostname = hostname;
   return true;
@@ -3156,7 +3193,7 @@ bool  WiFiManager::setHostname(String hostname){
  * set the soft ao channel, ignored if channelsync is true and connected
  * @param int32_t   wifi channel, 0 to disable
  */
-void WiFiManager::setWiFiAPChannel(int32_t channel){
+void WiFiManager::setWiFiAPChannel(int32_t channel) {
   _apChannel = channel;
 }
 
@@ -3164,7 +3201,7 @@ void WiFiManager::setWiFiAPChannel(int32_t channel){
  * set the soft ap hidden
  * @param bool   wifi ap hidden, default is false
  */
-void WiFiManager::setWiFiAPHidden(bool hidden){
+void WiFiManager::setWiFiAPHidden(bool hidden) {
   _apHidden = hidden;
 }
 
@@ -3316,7 +3353,7 @@ uint8_t WiFiManager::getLastConxResult(){
  * @return bool true if a saved ap config exists
  */
 bool WiFiManager::getWiFiIsSaved(){
-  return WiFi_hasAutoConnect();
+   return WiFi_hasAutoConnect();
 }
 
 /**
@@ -3391,6 +3428,11 @@ String WiFiManager::getWiFiSSID(bool persistent){
  * @return String
  */
 String WiFiManager::getWiFiPass(bool persistent){
+  #ifdef WM_DEBUG_LEVEL
+    DEBUG_WM(DEBUG_VERBOSE,F("ParameterCount:"), (String) _paramsCount);
+    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter:"), (String) _params[0]->getID());
+    DEBUG_WM(DEBUG_VERBOSE,F("Added Parameter Length:"),(String) _params[0]->_length);
+  #endif
   return WiFi_psk(persistent);
 } 
 
@@ -3943,6 +3985,7 @@ void WiFiManager::handleUpdate(AsyncWebServerRequest *request) {
   #endif
 	if (captivePortal(request)) return; // If captive portal redirect instead of displaying the page
 	String page = getHTTPHead(_title); // @token options
+  page += FPSTR(HTTP_MENU_BACK);
 	String str = FPSTR(HTTP_ROOT_MAIN);
   str.replace(FPSTR(T_t), _title);
 	str.replace(FPSTR(T_v), configPortalActive ? _apName : (getWiFiHostname() + " - " + WiFi.localIP().toString())); // use ip if ap is not active for heading
@@ -3957,124 +4000,85 @@ void WiFiManager::handleUpdate(AsyncWebServerRequest *request) {
 
 // upload via /u POST
 void WiFiManager::handleUpdating(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
-  // @todo
-  // cannot upload files in captive portal, file select is not allowed, show message with link or hide
-  // cannot upload if softreset after upload, maybe check for hard reset at least for dev, ERROR[11]: Invalid bootstrapping state, reset ESP8266 before updating
-  // add upload status to webpage somehow
-  // abort upload if error detected ?
-  // [x] supress cp timeout on upload, so it doesnt keep uploading?
-  // add progress handler for debugging
-  // combine route handlers into one callback and use argument or post checking instead of mutiple functions maybe, if POST process else server upload page?
-  // [x] add upload checking, do we need too check file?
-  // convert output to debugger if not moving to example
-	
-  // if (captivePortal()) return; // If captive portal redirect instead of displaying the page
   bool error = false;
   unsigned long _configPortalTimeoutSAV = _configPortalTimeout; // store cp timeout
   _configPortalTimeout = 0; // disable timeout
 
-  // handler for the file upload, get's the sketch bytes, and writes
-	// them through the Update object
-/*	HTTPUpload& upload = request->upload();
-  
-  // UPLOAD START
-	if (upload.status == UPLOAD_FILE_START) {
-	  // if(_debug) Serial.setDebugOutput(true);
-    uint32_t maxSketchSpace;
-*/    
     // Use new callback for before OTA update
     if (_preotaupdatecallback != NULL) {
       _preotaupdatecallback();  // @CALLBACK
     }
-/*    #ifdef ESP8266
-    		WiFiUDP::stopAll();
-    		maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-    #elif defined(ESP32)
-          // Think we do not need to stop WiFIUDP because we haven't started a listener
-    		  // maxSketchSpace = (ESP.getFlashChipSize() - 0x1000) & 0xFFFFF000;
-          // #define UPDATE_SIZE_UNKNOWN 0xFFFFFFFF // include update.h
-          maxSketchSpace = UPDATE_SIZE_UNKNOWN;
-    #endif
-
-    #ifdef WM_DEBUG_LEVEL
-    DEBUG_WM(DEBUG_VERBOSE,"[OTA] Update file: ", upload.filename.c_str());
-    #endif
-
-    // Update.onProgress(THandlerFunction_Progress fn);
-    // Update.onProgress([](unsigned int progress, unsigned int total) {
-    //       Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    // });
-
-  	if (!Update.begin(maxSketchSpace)) { // start with max available size
-        #ifdef WM_DEBUG_LEVEL
-        DEBUG_WM(DEBUG_ERROR,F("[ERROR] OTA Update ERROR"), Update.getError());
-        #endif
-        error = true;
-        Update.end(); // Not sure the best way to abort, I think client will keep sending..
-  	}
-	}
-  // UPLOAD WRITE
-  else if (upload.status == UPLOAD_FILE_WRITE) {
-		// Serial.print(".");
-		if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-      #ifdef WM_DEBUG_LEVEL
-      DEBUG_WM(DEBUG_ERROR,F("[ERROR] OTA Update WRITE ERROR"), Update.getError());
-			//Update.printError(Serial); // write failure
-      #endif
-      error = true;
-		}
-	}
-  // UPLOAD FILE END
-  else if (upload.status == UPLOAD_FILE_END) {
-		if (Update.end(true)) { // true to set the size to the current progress
-      #ifdef WM_DEBUG_LEVEL
-      DEBUG_WM(DEBUG_VERBOSE,F("\n\n[OTA] OTA FILE END bytes: "), upload.totalSize);
-			// Serial.printf("Updated: %u bytes\r\nRebooting...\r\n", upload.totalSize);
-      #endif
-		}
-    else {
-			// Update.printError(Serial);
-      error = true;
-		}
-	}
-  // UPLOAD ABORT
-  else if (upload.status == UPLOAD_FILE_ABORTED) {
-		Update.end();
-		DEBUG_WM(F("[OTA] Update was aborted"));
-    error = true;
-  }
-*/
   if (!index) {
     DEBUG_WM("Firmware Update gestartet");
-    // if filename includes spiffs, update the spiffs partition
-    int cmd = (filename.indexOf("spiffs") > 0) ? U_SPIFFS : U_FLASH;
-    if (!Update.begin(UPDATE_SIZE_UNKNOWN, cmd)) {
-      Update.printError(Serial);
-      error = true;
+    // Start update process
+    #if defined(ESP8266)
+    uint32_t update_size = mode == OTA_MODE_FILESYSTEM ? ((size_t)FS_end - (size_t)FS_start) : ((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000);
+    if (mode == OTA_MODE_FILESYSTEM) {
+        close_all_fs();
     }
+    Update.runAsync(true);
+    if (!Update.begin(update_size, mode == OTA_MODE_FILESYSTEM ? U_FS : U_FLASH)) {
+      DEBUG_WM("Failed to start update process\n");
+      // Save error to string
+      StreamString str;
+      Update.printError(str);
+      _update_error = str.c_str();
+      _update_error += "\n";
+      DEBUG_WM(_update_error.c_str());
+      error = true;
+  }
+    #elif defined(ESP32)  
+// ToDo wenn auch das Fielsystem aktullliaiert werden kann
+//      if (!Update.begin(UPDATE_SIZE_UNKNOWN, mode == OTA_MODE_FILESYSTEM ? U_SPIFFS : U_FLASH)) {
+    // if filename includes spiffs, update the spiffs partition
+      int cmd = (filename.indexOf("spiffs") > 0) ? U_SPIFFS : U_FLASH;
+      if (!Update.begin(UPDATE_SIZE_UNKNOWN, cmd)) {
+        DEBUG_WM("Failed to start update process\n");
+        // Save error to string
+        StreamString str;
+        Update.printError(str);
+        _update_error = str.c_str();
+        _update_error += "\n";
+        DEBUG_WM(_update_error.c_str());
+        error = true;
+      }        
+    #endif
   }
 
-  if (Update.write(data, len) != len) {
-    Update.printError(Serial);
-    error = true;
+  if(len){
+    if (Update.write(data, len) != len) {
+      StreamString str;
+      Update.printError(str);
+      _update_error = str.c_str();
+      _update_error += "\n";
+      DEBUG_WM(_update_error.c_str());
+      error = true;
+    } else {
+      _current_progress_size += len;
+      // Progress update callback
+      if (_progressOtaUpdateCallback != NULL) _progressOtaUpdateCallback(_current_progress_size, request->contentLength());
+    }
   }
-  
-  if (final) {
-//    AsyncWebServerResponse *response = request->beginResponse(302, "text/plain", "Please wait while the switch reboots");
-//    response->addHeader("Refresh", "15");  
-//    response->addHeader("Location", "/");
-//    request->send(response);
  
+  if (final) {
     if (!Update.end(true)) {
-      Update.printError(Serial);
+      StreamString str;
+      Update.printError(str);
+      _update_error = str.c_str();
+      _update_error += "\n";
+      DEBUG_WM(_update_error.c_str());
       error = true;
    }
+  } else if (!error) {
+    return;
   }
   if(error) _configPortalTimeout = _configPortalTimeoutSAV;
 	DEBUG_WM(DEBUG_VERBOSE, F("<- Handle update done"));
 	// if (captivePortal()) return; // If captive portal redirect instead of displaying the page
+  if (_postOtaUpdateCallback != NULL) _postOtaUpdateCallback(!Update.hasError());
 
 	String page = getHTTPHead(FPSTR(S_options)); // @token options
+  page += FPSTR(HTTP_MENU_BACK);
 	String str  = FPSTR(HTTP_ROOT_MAIN);
   str.replace(FPSTR(T_t),_title);
 	str.replace(FPSTR(T_v), configPortalActive ? _apName : WiFi.localIP().toString()); // use ip if ap is not active for heading

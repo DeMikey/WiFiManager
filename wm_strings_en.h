@@ -38,11 +38,23 @@ const char HTTP_SCRIPT[]           PROGMEM = "<script>function c(l){"
 "</script>"; // @todo add button states, disable on click , show ack , spinner etc
 
 const char HTTP_HEAD_END[]         PROGMEM = "</head><body class='{c}'><div class='wrap'>"; // {c} = _bodyclass
+
+const char HTTP_MENU_BACK[]        PROGMEM = "<div class='arrowed'><a href='/'><div class='arrow-back'></div></a></div>";
 // example of embedded logo, base64 encoded inline, No styling here
 // const char HTTP_ROOT_MAIN[]        PROGMEM = "<img title=' alt=' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADQElEQVRoQ+2YjW0VQQyE7Q6gAkgFkAogFUAqgFQAVACpAKiAUAFQAaECQgWECggVGH1PPrRvn3dv9/YkFOksoUhhfzwz9ngvKrc89JbnLxuA/63gpsCmwCADWwkNEji8fVNgotDM7osI/x777x5l9F6JyB8R4eeVql4P0y8yNsjM7KGIPBORp558T04A+CwiH1UVUItiUQmZ2XMReSEiAFgjAPBeVS96D+sCYGaUx4cFbLfmhSpnqnrZuqEJgJnd8cQplVLciAgX//Cf0ToIeOB9wpmloLQAwpnVmAXgdf6pwjpJIz+XNoeZQQZlODV9vhc1Tuf6owrAk/8qIhFbJH7eI3eEzsvydQEICqBEkZwiALfF70HyHPpqScPV5HFjeFu476SkRA0AzOfy4hYwstj2ZkDgaphE7m6XqnoS7Q0BOPs/sw0kDROzjdXcCMFCNwzIy0EcRcOvBACfh4k0wgOmBX4xjfmk4DKTS31hgNWIKBCI8gdzogTgjYjQWFMw+o9LzJoZ63GUmjWm2wGDc7EvDDOj/1IVMIyD9SUAL0WEhpriRlXv5je5S+U1i2N88zdPuoVkeB+ls4SyxCoP3kVm9jsjpEsBLoOBNC5U9SwpGdakFkviuFP1keblATkTENTYcxkzgxTKOI3jyDxqLkQT87pMA++H3XvJBYtsNbBN6vuXq5S737WqHkW1VgMQNXJ0RshMqbbT33sJ5kpHWymzcJjNTeJIymJZtSQd9NHQHS1vodoFoTMkfbJzpRnLzB2vi6BZAJxWaCr+62BC+jzAxVJb3dmmiLzLwZhZNPE5e880Suo2AZgB8e8idxherqUPnT3brBDTlPxO3Z66rVwIwySXugdNd+5ejhqp/+NmgIwGX3Py3QBmlEi54KlwmjkOytQ+iJrLJj23S4GkOeecg8G091no737qvRRdzE+HLALQoMTBbJgBsCj5RSWUlUVJiZ4SOljb05eLFWgoJ5oY6yTyJp62D39jDANoKKcSocPJD5dQYzlFAFZJflUArgTPZKZwLXAnHmerfJquUkKZEgyzqOb5TuDt1P3nwxobqwPocZA11m4A1mBx5IxNgRH21ti7KbAGiyNn3HoF/gJ0w05A8xclpwAAAABJRU5ErkJggg==' /><h1>{v}</h1><h3>WiFiManager</h3>";
 const char HTTP_ROOT_MAIN[]        PROGMEM = "<h1>{t}</h1><h3>{v}</h3>";
 
+const char HTTP_PORTAL_MENU_START[] PROGMEM = {
+"<div class='hamburger-menu'>\n"
+" <input id='menu__toggle' type='checkbox'/>\n"
+" <label class='menu__btn' for='menu__toggle'>\n"
+" <span></span>\n"
+" </label>\n"
+" <ul class='menu__box'>\n"
+};
+
 const char * const HTTP_PORTAL_MENU[] PROGMEM = {
+/*
 "<form action='/wifi'    method='get'><button>Configure WiFi</button></form><br/>\n", // MENU_WIFI
 "<form action='/0wifi'   method='get'><button>Configure WiFi (No scan)</button></form><br/>\n", // MENU_WIFINOSCAN
 "<form action='/info'    method='get'><button>Info</button></form><br/>\n", // MENU_INFO
@@ -52,7 +64,23 @@ const char * const HTTP_PORTAL_MENU[] PROGMEM = {
 "<form action='/exit'    method='get'><button>Exit</button></form><br/>\n",  // MENU_EXIT
 "<form action='/erase'   method='get'><button class='D'>Erase</button></form><br/>\n", // MENU_ERASE
 "<form action='/update'  method='get'><button>Update</button></form><br/>\n",// MENU_UPDATE
-"<hr><br/>" // MENU_SEP
+"<hr><br/>" // MENU_SE
+*/
+" <li><a class='menu__item' href='/wifi'>Configure WiFi</a></li>\n",
+" <li><a class='menu__item' href='/0wifi'>Configure WiFi (No scan)</a></li>\n",
+" <li><a class='menu__item' href='/info'>Info</a></li>\n",
+" <li><a class='menu__item' href='/param'>Setup</a></li>\n",
+" <li><a class='menu__item' href='/close'>Close</a></li>\n",
+" <li><a class='menu__item' href='/restart'>Restart</a></li>\n",
+" <li><a class='menu__item' href='/exit'>Exit</a></li>\n",
+" <li><a class='menu__item' href='/erase'>Erase</a></li>\n",
+" <li><a class='menu__item' href='/update'>Update</a></li>\n",
+"<hr><br/>" // MENU_SE
+};
+
+const char HTTP_PORTAL_MENU_END[] PROGMEM = {
+" </ul>\n"
+" </div>\n"
 };
 
 // const char HTTP_PORTAL_OPTIONS[]   PROGMEM = strcat(HTTP_PORTAL_MENU[0] , HTTP_PORTAL_MENU[3] , HTTP_PORTAL_MENU[7]);
@@ -116,6 +144,29 @@ const char HTTP_STYLE[]            PROGMEM = "<style>"
 "body.invert .msg{color:#fff;background-color:#282828;border-top:1px solid #555;border-right:1px solid #555;border-bottom:1px solid #555;}"
 "body.invert .q[role=img]{-webkit-filter:invert(1);filter:invert(1);}"
 ":disabled {opacity: 0.5;}"
+// Menu
+"#menu__toggle {opacity: 0;}"
+"#menu__toggle:checked + .menu__btn > span {transform: rotate(45deg);}"
+"#menu__toggle:checked + .menu__btn > span::before {top: 0;transform: rotate(0deg);background-color: #ffffff;}"
+"#menu__toggle:checked + .menu__btn > span::after {top: 0;transform: rotate(90deg);background-color: #ffffff;}"
+"#menu__toggle:checked ~ .menu__box {left: 0 !important;}"
+".menu__btn {position: fixed;top: 20px;left: 20px;width: 26px;height: 26px;cursor: pointer;z-index: 1;}"
+".menu__btn > span,"
+".menu__btn > span::before,"
+".menu__btn > span::after {display: block;position: absolute;width: 100%; height: 2px;background-color: #26a69a;;transition-duration: .25s;}"
+".menu__btn > span::before {content: '';top: -8px;}"
+".menu__btn > span::after {content: '';top: 8px;}"
+".menu__box {display: block;position: fixed;top: 0;left: -100%;width: 300px;height: 100%;margin: 0;padding: 80px 0;list-style: none;background-color: #26a69a;box-shadow: 2px 2px 6px rgba(0, 0, 0, .4);transition-duration: .25s;}"
+".menu__item {display: block;padding: 12px 24px;color: #ffffff;font-family: 'Roboto', sans-serif;font-size: 20px;font-weight: 600;text-decoration: none;transition-duration: .25s;}"
+".menu__item:hover {background-color: #CFD8DC;}"
+// ARROW Back
+".arrowed {position: fixed;top: 0px;left: 20px;height: 20px;width: 30px}"
+".arrow-back {height: 10px;width: 10px;border: 1px solid #cfd8dc;border-width: 3px 3px 0 0;transform: rotate(225deg);}"
+".arrow-back:before, .arrow-back:after {content: '';position: absolute;display: block;height: 10px; width: 10px;border-width: 3px 3px 0 0;}"
+// top - distance minus border
+".arrow-back:before {border: 1px solid #eee;border-width: 3px 3px 0 0;top: 7px; left: -10px;}"
+// top - distance plus border
+".arrow-back:after {border: 1px solid #26a69a;border-width: 3px 3px 0 0;top: -13px; left: 10px;}"
 "</style>";
 
 #ifndef WM_NOHELP
