@@ -50,7 +50,7 @@ const char HTTP_PORTAL_MENU_START[] PROGMEM = {
 " <label class='menu__btn' for='menu__toggle'>\n"
 " <span></span>\n"
 " </label>\n"
-" <ul class='menu__box'>\n"
+" <ul class='menu__box' id='menu'>\n"
 };
 
 const char * const HTTP_PORTAL_MENU[] PROGMEM = {
@@ -118,11 +118,11 @@ const char HTTP_BR[]               PROGMEM = "<br/>";
 const char HTTP_STYLE[]            PROGMEM = "<style>"
 ".c,body{text-align:center;font-family:verdana}div,input,select{padding:5px;font-size:1em;margin:5px 0;box-sizing:border-box}"
 "input,button,select,.msg{border-radius:.3rem;width: 100%}input[type=radio],input[type=checkbox]{width:auto}"
-"button,input[type='button'],input[type='submit']{cursor:pointer;border:0;background-color:#1fa3ec;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%}"
-"input[type='file']{border:1px solid #1fa3ec}"
+"button,input[type='button'],input[type='submit']{cursor:pointer;border:0;background-color:#26a69a;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%}"
+"input[type='file']{border:1px solid #26a69a}"
 ".wrap {text-align:left;display:inline-block;min-width:260px;max-width:500px}"
 // links
-"a{color:#000;font-weight:700;text-decoration:none}a:hover{color:#1fa3ec;text-decoration:underline}"
+"a{color:#000;font-weight:700;text-decoration:none}a:hover{color:#26a69a;text-decoration:underline}"
 // quality icons
 ".q{height:16px;margin:0;padding:0 5px;text-align:right;min-width:38px;float:right}.q.q-0:after{background-position-x:0}.q.q-1:after{background-position-x:-16px}.q.q-2:after{background-position-x:-32px}.q.q-3:after{background-position-x:-48px}.q.q-4:after{background-position-x:-64px}.q.l:before{background-position-x:-80px;padding-right:5px}.ql .q{float:left}.q:after,.q:before{content:'';width:16px;height:16px;display:inline-block;background-repeat:no-repeat;background-position: 16px 0;"
 "background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAAQCAMAAADeZIrLAAAAJFBMVEX///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADHJj5lAAAAC3RSTlMAIjN3iJmqu8zd7vF8pzcAAABsSURBVHja7Y1BCsAwCASNSVo3/v+/BUEiXnIoXkoX5jAQMxTHzK9cVSnvDxwD8bFx8PhZ9q8FmghXBhqA1faxk92PsxvRc2CCCFdhQCbRkLoAQ3q/wWUBqG35ZxtVzW4Ed6LngPyBU2CobdIDQ5oPWI5nCUwAAAAASUVORK5CYII=');}"
@@ -145,6 +145,7 @@ const char HTTP_STYLE[]            PROGMEM = "<style>"
 "body.invert .q[role=img]{-webkit-filter:invert(1);filter:invert(1);}"
 ":disabled {opacity: 0.5;}"
 // Menu
+".hamburger-menu {position: fixed;top: 0px;left: 20px;height: 20px;width: 30px}"
 "#menu__toggle {opacity: 0;}"
 "#menu__toggle:checked + .menu__btn > span {transform: rotate(45deg);}"
 "#menu__toggle:checked + .menu__btn > span::before {top: 0;transform: rotate(0deg);background-color: #ffffff;}"
@@ -156,9 +157,9 @@ const char HTTP_STYLE[]            PROGMEM = "<style>"
 ".menu__btn > span::after {display: block;position: absolute;width: 100%; height: 2px;background-color: #26a69a;;transition-duration: .25s;}"
 ".menu__btn > span::before {content: '';top: -8px;}"
 ".menu__btn > span::after {content: '';top: 8px;}"
-".menu__box {display: block;position: fixed;top: 0;left: -100%;width: 300px;height: 100%;margin: 0;padding: 80px 0;list-style: none;background-color: #26a69a;box-shadow: 2px 2px 6px rgba(0, 0, 0, .4);transition-duration: .25s;}"
-".menu__item {display: block;padding: 12px 24px;color: #ffffff;font-family: 'Roboto', sans-serif;font-size: 20px;font-weight: 600;text-decoration: none;transition-duration: .25s;}"
-".menu__item:hover {background-color: #CFD8DC;}"
+".menu__box{display: block;position: fixed;top: 0;left: -100%;width: 300px;height: 100%;margin: 0;padding: 80px 0;list-style: none;background-color: #26a69a;box-shadow: 2px 2px 6px rgba(0, 0, 0, .4);transition-duration: .25s;}"
+"#menu .menu__item{display: block;padding: 12px 24px;color: #ffffff;font-family: 'Roboto', sans-serif;font-size: 20px;font-weight: 600;text-decoration: none;background-color: #26a69a;transition-duration: .25s;}"
+"#menu .menu__item:hover{background-color: #CFD8DC;}"
 // ARROW Back
 ".arrowed {position: fixed;top: 0px;left: 20px;height: 20px;width: 30px}"
 ".arrow-back {height: 10px;width: 10px;border: 1px solid #cfd8dc;border-width: 3px 3px 0 0;transform: rotate(225deg);}"
